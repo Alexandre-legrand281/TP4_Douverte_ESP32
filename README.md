@@ -1,5 +1,5 @@
 # TP4_Douverte_ESP32
 
-# Visual Studio Code
+## Visual Studio Code
 
-# Micro Python Code
+## Micro Python Code
