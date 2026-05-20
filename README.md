@@ -20,7 +20,17 @@ ATTENTION: Il ce peut que l'installation ne puisse pas etre effectué, car il y 
 
 ### 3.1 Allumer une LED sur GPIO
 
-Pour cette partie la, je devais selon le cahier des charges allumer la LED D1 de la carte lorsque j'appuie sur le bouton S1. La premiere etape que j'ai du de faire, c'etait de regarder dans le 
+Pour cette partie la, je devais selon le cahier des charges allumer la LED D1 de la carte lorsque j'appuie sur le bouton S1. La premiere etape que j'ai du effectuer, c'etait d'importer la librairie nécessaire pour intéragir avec les GPIO, ainsi qu'une deuxieme librairie pour ajouter un systéme d'Antirebond sur les intérrupteur.
+
+    # Librairies Importé
+    from machine import Pin
+    import time
+
+Par la suite, j'ai du de regarder dans le Schéma de la carte quels GPIO etait relier a S1 et D1. Dans mon cas S1 est relier au GPIO4 et D1 à GPIO6.
+
+Image du Datasheet
+
+
 
 ### 3.2 Allumer une LED RGB
 
