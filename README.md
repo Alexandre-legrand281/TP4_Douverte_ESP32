@@ -58,7 +58,7 @@ Maintenant dans ma boucle infinit, je vais avant tout placer un point de repere 
         # Point de repere du temps actuelle en ms
         now = time.ticks_ms()
 
-Pour la detection de flanc de S1, je vais devoir utiliser la variable "last_S1_Value" ainsi que la variable "s1" et de la fonction ".value()". Mécaniquement lorsque j'appuie sur le bouton S1, il y a un flanc descendant, donc en language programmation il faut que mon ancien état de S1 soit à 1 et l'état actuelle à 0. La fonction ".value()" va determiner quel est l'état actuelle de "s1" et à la fin de ma boucle infinit je dois enregistré l'état actuelle dans "last_S1_Value", pour que au debut de la prochaine boucle "last_S1_Value" contienne l'ancien état de "s1".
+Pour la detection de flanc de S1, je vais devoir utiliser la variable "last_S1_Value" ainsi que la variable "s1" et de la fonction ".value()". Mécaniquement lorsque j'appuie sur le bouton S1, il y a un flanc descendant, donc en language programmation il faut que mon ancien état de S1 soit à 1 et l'état actuelle à 0. La fonction ".value()" va determiner quel est l'état actuelle de "s1" et à la fin de ma boucle infinit je dois enregistré l'état actuelle dans "last_S1_Value", pour que au debut de la prochaine boucle "last_S1_Value" contienne l'ancien état de "s1". J'ajoute également a la fin de ma boucle infinit la fonction "time.sleep_ms(1)", qui permet a de stabiliser mon ESP32.
 
     # Boucle Infinie
     While True:
@@ -73,8 +73,10 @@ Pour la detection de flanc de S1, je vais devoir utiliser la variable "last_S1_V
         # Mise à jour des états
         last_S1_Value = s1.value()
 
-Pour le Systéme d'antirebond de S1, je 
-    
+        # Temps de repos de 1 ms
+        time.sleep_ms(1)
+
+Le systéme d'antirebond ce fait a l'interieur de mon "if" pour la detection de flanc. Pour ceci je vais utiliser la fonction "time.ticks_diff", de la variable "debounce_s1" et de "now". Ce que je vais faire ce seras de differentier le temps entre l'instant ou il y a un premier flanc descendant a l'instant present, et lorsque la difference de temps est supérieur a 10ms, je valide alors 
 
 ### 3.2 Allumer une LED RGB
 
