@@ -30,7 +30,51 @@ Par la suite, j'ai du de regarder dans le Schéma de la carte quels GPIO etait r
 
 Image du Datasheet
 
+Une fois ceci determiné, je vais définir mon switch S1 et LED D1, puis initialiser les GPIO grace à la fonction "Pin", et avec comme parametre la définition du switch, ou de la LED, puis "Pin.IN" pour configurer une entrée ou "Pin.OUT" pour configurer une sortie.
 
+    # Entrée des Switchs
+    PIN_S1 = 4    # Switch S1
+
+    # Sortie des LEDs
+    PIN_D1 = 6    # LED D1
+
+    # Initialisation des GPIOs
+    s1 = Pin(PIN_S1, Pin.IN)
+    led_d1 = Pin(PIN_D1, Pin.OUT)
+
+Par la suite, je vais devoir initialiser une variable pour la detection de flanc de S1, une autre pour le systéme d'antirebonde de S1 et également une derniere pour le changement d'état de D1.
+
+    # Variables pour la logique
+    d1_state = False
+
+    # Variables de detection de flanc et l'antirebond
+    last_S1_Value = 0
+    debounce_s1 = 0
+
+Maintenant dans ma boucle infinit, je vais avant tout placer un point de repere temporelle. Cella permetras de metre en oeuvre mon systeme d'antirebond.
+
+    # Boucle Infinie
+    While True:
+        # Point de repere du temps actuelle en ms
+        now = time.ticks_ms()
+
+Pour la detection de flanc de S1, je vais devoir utiliser la variable "last_S1_Value" ainsi que la variable "s1" et de la fonction ".value()". Mécaniquement lorsque j'appuie sur le bouton S1, il y a un flanc descendant, donc en language programmation il faut que mon ancien état de S1 soit à 1 et l'état actuelle à 0. La fonction ".value()" va determiner quel est l'état actuelle de "s1" et à la fin de ma boucle infinit je dois enregistré l'état actuelle dans "last_S1_Value", pour que au debut de la prochaine boucle "last_S1_Value" contienne l'ancien état de "s1".
+
+    # Boucle Infinie
+    While True:
+        # Point de repere du temps actuelle en ms
+        now = time.ticks_ms()
+
+        # Detection de flanc sur S1
+        if last_S1_Value == 1 and s1.value() == 0:
+
+        ...
+
+        # Mise à jour des états
+        last_S1_Value = s1.value()
+
+Pour le Systéme d'antirebond de S1, je 
+    
 
 ### 3.2 Allumer une LED RGB
 
