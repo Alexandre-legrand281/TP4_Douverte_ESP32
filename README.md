@@ -140,6 +140,8 @@ Pour cette partie la, on nous demande de pouvoir changer la couleur de la LED RG
 
 La deuxieme étape est tout comme pour la partie précédente, est de pouvoir crée des définitions pour mon Switch S2, ainsi que pour ma LED RGB. Donc je dois d'abord regarder le Schéma pour connaitre le GPIO branché au Switch. Dans mon cas S2 est sur le GPIO5 selon le schéma et la LED RGB sur le GPIO48 (L'information est directement ecrit sur le PCB avec l'ESP32-S3)
 
+![Schema](/Images/Switch_Schema.png)
 
+![LED_RGB](/Images/)
 
 ### 3.3 Connexion sans fil à un autre ESP
