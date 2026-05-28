@@ -131,4 +131,13 @@ A l'intérieur de mes deux "if", je change l'état de la LED D1, grace a la vari
 
 ### 3.2 Allumer une LED RGB
 
+Pour cette partie la, on nous demande de pouvoir changer la couleur de la LED RGB a chaque fois qu'on appuierais sur l'interrupteur S2. Pour ceci, je dois d'abord importer la librairie "neopixel" pour pouvoir varier les couleurs RGB de ma LED D2.
+
+    # Librairies Importé
+    from machine import Pin
+    import time
+    import neopixel
+
+La deuxieme étape est tout comme pour la partie précédente, est de pouvoir crée des définitions pour mon Switch S2, ainsi que pour ma LED RGB. Donc je dois d'abord regarder le Schéma pour connaitre les GPIO branché au Switch et a la LED. Dans mon cas S2 est sur le GPIO5 et la LED RGB sur le GPIO48
+
 ### 3.3 Connexion sans fil à un autre ESP
