@@ -8,7 +8,7 @@
 
 Afin de développer mon code, j'ai du d'installer Thonny et Flasher le logiciel pour pouvoir coder en MicroPython. Apres avoir branché l'ESP32, j'ai du d'acceder aux options de Thonny, puis interpreter le type "MicroPython (ESP32)", et séléctionner le port ou est branché l'ESP32. Pour savoir a quel port est brancher l'ESP32, j'ai du d'acceder au Gestionnaire de périphériques (dans mon cas c'est le COM14).
 
-![Options](/TP4 - Découverte ESP32/Images/Option_de_Thonny.png)
+![Options](/Images/Option_de_Thonny.png)
 
 Image Gestionnaire de périphérique
 
