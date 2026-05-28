@@ -10,7 +10,7 @@ Afin de développer mon code, j'ai du d'installer Thonny et Flasher le logiciel 
 
 ![Options](/Images/Option_de_Thonny.png)
 
-Image Gestionnaire de périphérique
+![Peripheriques](/Images/Gestionnaire_de_peripheriques.png)
 
 Une fois cette etape effectué, il faut cliquer sur "Installer ou metre a jour MicroPython". Une fenetre va allors s'ouvrir, et il va faloir selectionner a nouveau le port ou ce situe mon ESP32 dans "Target port". Il faudras egalement selectionner la famille de MicroPython, la varainte et la version, au quel j'ai respectivement configurer de la maniere ci-dessous.
 
