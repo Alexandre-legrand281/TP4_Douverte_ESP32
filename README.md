@@ -76,7 +76,58 @@ Pour la detection de flanc de S1, je vais devoir utiliser la variable "last_S1_V
         # Temps de repos de 1 ms
         time.sleep_ms(1)
 
-Le systéme d'antirebond ce fait a l'interieur de mon "if" pour la detection de flanc. Pour ceci je vais utiliser la fonction "time.ticks_diff", de la variable "debounce_s1" et de "now". Ce que je vais faire ce seras de differentier le temps entre l'instant ou il y a un premier flanc descendant a l'instant present, et lorsque la difference de temps est supérieur a 10ms, je valide alors 
+Le systéme d'antirebond ce fait a l'interieur de mon "if" pour la detection de flanc. Pour ceci je vais utiliser la fonction "time.ticks_diff", la variable "debounce_s1" et "now". Ce que je vais faire ce seras de differentier le temps entre l'instant ou il y a un premier flanc descendant a l'instant present, et lorsque la difference de temps est supérieur a 10ms, je valide alors la condition et je peux rentrer dans le code de la consigne 3.1.
+
+        # Detection de flanc sur S1
+        if last_S1_Value == 1 and s1.value() == 0:
+            # Antirebond sur S1
+            if time.ticks_diff(now, debounce_s1) > 10:
+
+            ...
+
+A l'intérieur de mes deux "if", je change l'état de la LED D1, grace a la variable "d1_state", "led_d1" et la fonction ".value". Puis une fois le changement d'état effectué, je resster le systéme d'anti rebond pour la prochaine fois ou j'appuierais dessus. Voila a quoi ressemble le code entier pour cette partie la:
+
+    # Librairies Importé
+    from machine import Pin
+    import time
+
+    # Entrée des Switchs
+    PIN_S1 = 4    # Switch S1
+
+    # Sortie des LEDs
+    PIN_D1 = 6    # LED D1
+
+    # Initialisation des GPIOs
+    s1 = Pin(PIN_S1, Pin.IN)
+    led_d1 = Pin(PIN_D1, Pin.OUT)
+
+    # Variables pour la logique
+    d1_state = False
+
+    # Variables de detection de flanc et l'antirebond
+    last_S1_Value = 0
+    debounce_s1 = 0
+
+    # Boucle Infinie
+    While True:
+        # Point de repere du temps actuelle en ms
+        now = time.ticks_ms()
+
+        # Detection de flanc sur S1
+        if last_S1_Value == 1 and s1.value() == 0:
+            # Antirebond sur S1
+            if time.ticks_diff(now, debounce_s1) > 10:
+                # Changement d'état de D1
+                d1_state = not d1_state
+                led_d1.value(d1_state)
+                # Reset du temps d'Anti rebond sur S1
+                debounce_s1 = now
+
+        # Mise à jour des états
+        last_S1_Value = s1.value()
+
+        # Temps de repos de 1 ms
+        time.sleep_ms(1)
 
 ### 3.2 Allumer une LED RGB
 
