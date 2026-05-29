@@ -144,4 +144,24 @@ La deuxieme étape est tout comme pour la partie précédente, est de pouvoir cr
 
 ![LED_RGB](/Images/LED_RGB.png)
 
+Maintenant que j'ai pu determiné les GPIO de mon switch et de la LED, il faut que je vais les définir et initialiser les GPIO non seulement avec la fonction "Pin", mais je vais aussi utiliser la fonction "neopixel.NeoPixel". Cette fonction permet d'initialiser ma LED RGB, grace a la librairie neopixel.
+
+    # Entrée des Switchs
+    PIN_S1 = 4     # Switch S1
+    PIN_S2 = 5     # Switch S2
+
+    # Sortie des LEDs
+    PIN_D1 = 6     # LED D1
+    PIN_RGB = 48   # LED RGB
+
+    # Initialisation des GPIOs
+    s1 = Pin(PIN_S1, Pin.IN)
+    s2 = Pin(PIN_S2, Pin.IN)
+    led_d1 = Pin(PIN_D1, Pin.OUT)
+
+    # Initialisation de la LED RGB
+    np = neopixel.NeoPixel(Pin(PIN_RGB), 1)
+
+
+
 ### 3.3 Connexion sans fil à un autre ESP
