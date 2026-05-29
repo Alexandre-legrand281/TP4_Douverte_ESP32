@@ -162,6 +162,19 @@ Maintenant que j'ai pu determiné les GPIO de mon switch et de la LED, il faut q
     # Initialisation de la LED RGB
     np = neopixel.NeoPixel(Pin(PIN_RGB), 1)
 
+Je vais par la suite initialiser des variables pour la logique de notre LED RGB. La variable "rgb_index" serviras d'index pour le changement de couleur de ma LED, tandis que la variable "colors" est un tableau contenant l'index des differentes couleurs (Dans l'ordre ce seras Rouge; Vert et Bleu). Pourquoi est-ce que j'ai mis "16" au lieu de "255"? C'est pour eviter que la LED soit trop lumineuse.
 
+    # Variables pour la logique
+    d1_state = False
+    rgb_index = 0
+    colors = [(16, 0, 0), (0, 16, 0), (0, 0, 16)] # R, G, B
+
+Tout comme pour la partie 3.1, je vais ajouter une variable de detection de flanc et une autre pour le systéme d'antirebond pour l'interrupteur S2.
+
+    # Variables de detection de flanc et l'antirebond
+    last_S1_Value = 0
+    last_S2_Value = 0
+    debounce_s1 = 0
+    debounce_s2 = 0
 
 ### 3.3 Connexion sans fil à un autre ESP
