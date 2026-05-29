@@ -142,6 +142,6 @@ La deuxieme étape est tout comme pour la partie précédente, est de pouvoir cr
 
 ![Schema](/Images/Switch_Schema.png)
 
-![LED_RGB](/Images/)
+![LED_RGB](/Images/LED_RGB.png)
 
 ### 3.3 Connexion sans fil à un autre ESP
