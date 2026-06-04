@@ -177,7 +177,7 @@ Tout comme pour la partie 3.1, je vais ajouter une variable de detection de flan
     debounce_s1 = 0
     debounce_s2 = 0
 
-Dans ma boucle infinit, je vais tout comme pour la partie 3.1 ajouter deux "if". Un pour la detection de flanc montant, un un autre pour le systéme d'antirebond. Je vais egalement a la fin de mon code faire une mise a jour de l'état du switch S2
+Dans ma boucle infinit, je vais tout comme pour la partie 3.1 ajouter deux "if". Un pour la detection de flanc montant, un autre pour le systéme d'antirebond. Je vais egalement a la fin de mon code faire une mise a jour de l'état du switch S2
 
     # Boucle Infinie
     While True:
@@ -276,3 +276,8 @@ A l'interieur de ces deux "if", apres avoir fait la detection de flanc et le sys
         time.sleep_ms(1)
 
 ### 3.3 Connexion sans fil à un autre ESP
+
+Pour la partie 3.3, il faut deux ESP et ils doivent etablir une communication sans fil. Il s'agirait de crée deux modes:
+    - Le mode Local: Le mode au quel les deux ESP ne peuvent pas communiquer, et donc réalise les memes fonctions que dans les partie 3.1 et 3.2
+    - Le mode Remote: Le mode au quel les deux ESP peuvent communiquer. Lorsque ce mode est activé, la LED RGB des deux ESP clignote a une fréquence de 2Hz, et lorsque le bouton S2 de mon premier ESP est appuyer la LED RGB du deuxieme change de couleur, et inversement.
+Pour ceci, le datasheet de mon module ESP ou le schéma de mon PCB n'est pas nécessaire pour définir les GPIO, car les deux ESP sont identiques et auront donc les memes pins, et par conséquent le meme code.
