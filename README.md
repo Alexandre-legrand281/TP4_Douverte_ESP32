@@ -177,4 +177,102 @@ Tout comme pour la partie 3.1, je vais ajouter une variable de detection de flan
     debounce_s1 = 0
     debounce_s2 = 0
 
+Dans ma boucle infinit, je vais tout comme pour la partie 3.1 ajouter deux "if". Un pour la detection de flanc montant, un un autre pour le systéme d'antirebond. Je vais egalement a la fin de mon code faire une mise a jour de l'état du switch S2
+
+    # Boucle Infinie
+    While True:
+        # Point de repere du temps actuelle en ms
+        now = time.ticks_ms()
+
+        # Detection de flanc sur S1
+        if last_S1_Value == 1 and s1.value() == 0:
+            # Antirebond sur S1
+            if time.ticks_diff(now, debounce_s1) > 10:
+                # Changement d'état de D1
+                d1_state = not d1_state
+                led_d1.value(d1_state)
+                # Reset du temps d'Anti rebond sur S1
+                debounce_s1 = now
+
+        # Détection de flanc sur S2
+        if last_S2_Value == 1 and s2.value() == 0:
+            # Antirebond sur S2
+            if time.ticks_diff(now, debounce_s2) > 10:
+
+            ...
+
+        # Mise à jour des états
+        last_S1_Value = s1.value()
+        last_S2_Value = s2.value()
+
+        # Temps de repos de 1 ms
+        time.sleep_ms(1)
+
+A l'interieur de ces deux "if", apres avoir fait la detection de flanc et le systéme d'antirebond, je vais changer la valeur de ma variable "rgb_index" grace a un calcul, puis avec cette variable je vais changer la couleur de ma LED RGB grace a "np" et le tableau "colors", puis utiliser la fonction "np.write" pour confirmer le changement de couleur. Voici le code pour la partie 3.1 et 3.2 reunni:
+
+    # Librairies Importé
+    from machine import Pin
+    import time
+    import neopixel
+
+    # Entrée des Switchs
+    PIN_S1 = 4     # Switch S1
+    PIN_S2 = 5     # Switch S2
+
+    # Sortie des LEDs
+    PIN_D1 = 6     # LED D1
+    PIN_RGB = 48   # LED RGB
+
+    # Initialisation des GPIOs
+    s1 = Pin(PIN_S1, Pin.IN)
+    s2 = Pin(PIN_S2, Pin.IN)
+    led_d1 = Pin(PIN_D1, Pin.OUT)
+
+    # Initialisation de la LED RGB
+    np = neopixel.NeoPixel(Pin(PIN_RGB), 1)
+
+    # Variables pour la logique
+    d1_state = False
+    rgb_index = 0
+    colors = [(16, 0, 0), (0, 16, 0), (0, 0, 16)] # R, G, B
+
+    # Variables de detection de flanc et l'antirebond
+    last_S1_Value = 0
+    last_S2_Value = 0
+    debounce_s1 = 0
+    debounce_s2 = 0
+
+    # Boucle Infinie
+    While True:
+        # Point de repere du temps actuelle en ms
+        now = time.ticks_ms()
+
+        # Detection de flanc sur S1
+        if last_S1_Value == 1 and s1.value() == 0:
+            # Antirebond sur S1
+            if time.ticks_diff(now, debounce_s1) > 10:
+                # Changement d'état de D1
+                d1_state = not d1_state
+                led_d1.value(d1_state)
+                # Reset du temps d'Anti rebond sur S1
+                debounce_s1 = now
+
+        # Détection de flanc sur S2
+        if last_S2_Value == 1 and s2.value() == 0:
+            # Antirebond sur S2
+            if time.ticks_diff(now, debounce_s2) > 10:
+                # Changement de couleur de la LED RGB
+                rgb_index = (rgb_index + 1) % 3
+                np[0] = colors[rgb_index]
+                np.write()
+                # Reset du temps d'Anti rebond sur S2
+                debounce_s2 = now
+
+        # Mise à jour des états
+        last_S1_Value = s1.value()
+        last_S2_Value = s2.value()
+
+        # Temps de repos de 1 ms
+        time.sleep_ms(1)
+
 ### 3.3 Connexion sans fil à un autre ESP
