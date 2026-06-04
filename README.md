@@ -283,3 +283,13 @@ Pour la partie 3.3, il faut deux ESP et ils doivent etablir une communication sa
 - Le mode Remote: Le mode au quel les deux ESP peuvent communiquer. Lorsque ce mode est activé, la LED RGB des deux ESP clignote a une fréquence de 2Hz, et lorsque le bouton S2 de mon premier ESP est appuyer la LED RGB du deuxieme change de couleur, et inversement.
 
 Pour ceci, le datasheet de mon module ESP ou le schéma de mon PCB n'est pas nécessaire pour définir les GPIO, car les deux ESP sont identiques et auront donc les memes pins, et par conséquent le meme code.
+
+La premiere étape pour reussir a établir une connexion entre les deux ESP c'est d'ajouter les librairies "network" et "espnow"
+
+    # Librairies Importé
+    from machine import Pin
+    import time
+    import neopixel
+    import network, espnow
+
+Je vais maintenant initialiser quelques variables, qui me serviront pour le clignotement; l'envoi de donnée (que j'expliquerais par la suite); pour switcher entre le mode Remote et le mode Local et pour 
