@@ -4,8 +4,6 @@
 
 ### 3.2 Allumer une LED RGB
 
-salut
-
 ## Micro Python Code
 
 Afin de développer mon code, j'ai du d'installer Thonny et Flasher le logiciel pour pouvoir coder en MicroPython. Apres avoir branché l'ESP32, j'ai du d'acceder aux options de Thonny, puis interpreter le type "MicroPython (ESP32)", et séléctionner le port ou est branché l'ESP32. Pour savoir a quel port est brancher l'ESP32, j'ai du d'acceder au Gestionnaire de périphériques (dans mon cas c'est le COM14).
@@ -294,4 +292,21 @@ La premiere étape pour reussir a établir une connexion entre les deux ESP c'es
     import neopixel
     import network, espnow
 
-Je vais maintenant initialiser quelques variables, qui me serviront pour le clignotement; l'envoi de donnée (que j'expliquerais par la suite); pour switcher entre le mode Remote et le mode Local et pour 
+Je vais maintenant initialiser quelques variables, qui me serviront pour le clignotement; l'envoi de donnée (que j'expliquerais par la suite); pour switcher entre le mode Remote et le mode Local et pour le temps d'envoie.
+
+    # Variable du mode Remote
+    Remote = False
+    blink_time = 0
+    blink = False
+    send = 0
+    time_out = 0
+
+J'initialise et j'active la communication sans fil via le protocole ESP-NOW. Il faut configurer l'interface Wi-Fi de l'ESP32 en mode "Station" (STA), et pour ça j'utilise la fonction "wlan = network.WLAN(network.STA_IF)", puis j'allume physiquement le module radio Wi-Fi de la carte grace a la fonction "wlan.active(True)". Par la suite, j'initialise le protocole ESP-NOW avec "e = espnow.ESPNow()", et j'active celui-ci avec "e.active(True)"
+
+    # Initialisation réseau
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    e = espnow.ESPNow()
+    e.active(True)
+
+Je configure une variable que je nommerais "boardcast_mac", avec comme adresse MAC "b'\xff\xff\xff\xff\xff\xff'". Comme ça je ciblerais tout les ESP-32, et je 
