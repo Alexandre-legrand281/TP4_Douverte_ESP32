@@ -1,8 +1,30 @@
 # TP4_Douverte_ESP32
 ## Visual Studio Code
 ### 3.1 Allumer une LED sur GPIO
+Cette partie a pour but de faire changer l'état de la LED D1 à chaque appuis du bouton S1. Un mecanisme de detection de flanc et d'antirebond doit être implémenté.
+
+Librairies utilisées:
+
+
+Dans un premier temp il faut regarder quelle son nos GPIO d'entrée et de sortie:
+<img width="374" height="371" alt="LED_et_Switch_Schema" src="https://github.com/user-attachments/assets/a1c48d18-c46d-4d06-a61d-92f47ae7b41d" />
+On remarque que la LED D1 est le GPIO6 et que le Bouton S1 est le GPIO4.
+
+Code:
+
 
 ### 3.2 Allumer une LED RGB
+Cette partie a pour but de completer le programme afin que la LED RGB du ESP32-S3-DevKit-C change de couleur à chaque appuis du bouton S2 (R -> G -> B -> R -> etc.)
+
+Librairies utilisées:
+
+
+### 3.3 Connexion sans fil à un autre ESP
+Cette partie a pour but de completer le programme afin que l'ESP32 fonctionne localement ou alors en mode remote, le mod remote permet de changer la couleur de la LED RGB d'un autre kit ainsi qu'un autre kit puisse changer la couleur de la LED RGB de notre kit. La LED RGB doit clignioter à une frequence de 2 Hz pour indiquer une connextion active.
+
+Librairies utilisées:
+
+
 
 ## Micro Python Code
 
