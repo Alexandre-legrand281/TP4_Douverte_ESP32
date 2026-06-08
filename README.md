@@ -8,6 +8,7 @@ Librairies utilisées:
 
 Dans un premier temp il faut regarder quelle son nos GPIO d'entrée et de sortie:
 <img width="374" height="371" alt="LED_et_Switch_Schema" src="https://github.com/user-attachments/assets/a1c48d18-c46d-4d06-a61d-92f47ae7b41d" />
+
 On remarque que la LED D1 est le GPIO6 et que le Bouton S1 est le GPIO4.
 
 Code:
