@@ -19,6 +19,16 @@ Dans un premier temp il faut regarder quelle son nos GPIO d'entrée et de sortie
 
 On remarque que la LED D1 est le GPIO6 et que le Bouton S1 est le GPIO4.
 
+On peut alors remplir la fonction d'initalisation (se lançe automatiquement au début du code par l'ESP32):
+
+	void setup() 
+	{
+    // Initialiser les boutons GPIO
+    pinMode(6, OUTPUT);
+    pinMode(5, INPUT);
+    pinMode(4, INPUT);
+    digitalWrite(6, LOW);
+	}
 
 Pour la detection du bouton et de son flanc on doit déclarer ces deux variables:
 
@@ -28,6 +38,8 @@ Pour la detection du bouton et de son flanc on doit déclarer ces deux variables
 Il faut aussi déclarer la variable de la LED D1:
 
     bool ledState = 0;
+
+ boucle infinie:
 
 La syntaxe pour la boucle infinie est comme ceci:
 
@@ -42,7 +54,7 @@ Maintenant il faut lire l'état du bouton avec la ligne suivante:
 
 Cette fonction vas lire l'état d'un port entré en paramètre (GPIO4 dans notre cas)
 
-Maintenant on peut tester la valeur de notre bouton:
+Maintenant on peut tester la valeur de notre bouton et changer l'état de la led si besoin:
 
     if (boutonS1 == 1 && boutonOldS1 == 0) {
         ledState = !ledState;
@@ -62,6 +74,81 @@ Cette partie a pour but de completer le programme afin que la LED RGB du ESP32-S
 
 Librairies utilisées:
 
+	#include <FastLED.h>
+
+FastLed.h est une librairie arduino qui permet de piloter des LEDS adressables.
+
+Dans un premier temp il faut regarder quelle son nos GPIO d'entrée et de sortie:
+
+<img width="374" height="371" alt="LED_et_Switch_Schema" src="https://github.com/user-attachments/assets/a1c48d18-c46d-4d06-a61d-92f47ae7b41d" />
+
+On remarque que le bouton S2 correspond au GPIO5.
+
+On peut définir le nombre de LEDS pilotée et le GPIO de notre LED RGB:
+
+	#define NUM_LEDS 1 // Nombre de LEDs dans la bande
+	#define LED_PIN 48 //LED RGB connectée au GPIO 48
+
+On peut ajouter une structure pour les données pour la LED (importée de la librairie fastLed):
+
+	CRGBArray<NUM_LEDS> leds;
+
+Ensuite on défini les couleurs utilisée(Par rapport à la librairie fastLed):
+
+	CRGB colors[] = {
+    CRGB::Red,
+    CRGB::Green,
+    CRGB::Blue
+	};
+
+On peut completer la fonction d'initalisation (se lançe automatiquement au début du code par l'ESP32):
+
+	void setup() 
+	{
+    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);// Initialiser la bande LED avec le type WS2812, le pin défini et l'ordre de couleur GRB
+    FastLED.setBrightness(20);// Régler la luminosité des LEDs 
+    leds[0] = CRGB::Red;// Initialiser la première LED à rouge
+    FastLED.show();// Afficher les changements sur les LEDs
+    
+    // Initialiser les boutons GPIO
+    pinMode(6, OUTPUT);
+    pinMode(5, INPUT);
+    pinMode(4, INPUT);
+    digitalWrite(6, LOW);
+	}
+
+Dans cette initalisation on initalise La led RGB ainsi que les entrée et sortie GPIO.
+Pour la LED RGB on initalise en indiquant le protocole utilisé (WS2812), le GPIO utilisé (LED_PIN / GPIO48), L'ordre des couleurs (G R B), le tableau stockant les données de la couleurs dans le code, le nombre de led utilisé ( NUM_LEDS 1).
+On initalise aussi la luminosité de la LED ainsi que sa couleur de départ (rouge).
+
+On déclare la variable qui vas retenir à quelle couleur on se trouve ainsi que les deux variable du bouton S2:
+
+	int colorIndex = 0;
+	int boutonS2 = 0;
+	int boutonOldS2 = 0;
+
+ Boucle infinie:
+
+Lecture de l'état du bouton:
+
+	boutonS2 = digitalRead(5);// Lire l'état du bouton S2 connecté au GPIO 5
+
+On test la valeur du  bouton et de son flanc (flanc montant dans notre cas):
+
+	if (boutonS2 == 1 && boutonOldS2 == 0) 
+	{
+		colorIndex = (colorIndex + 1) % 3;
+        leds[0] = colors[colorIndex];
+        FastLED.show();
+	}
+	delay(10);
+
+Si on appuie sur S2 on incremente colorIndex de 1 et les valeurs possible sont 0 1 et 2 (grace au modulo 3).
+On update ensuite leds (qui est lier à la structure CRGBArray) et la fonction FastLED.show(); vas changer l'état phisique de la LED RGB.
+
+À la fin du code on archive la valeur du bouton S2:
+
+	boutonOldS2 = boutonS2;
 
 ### 3.3 Connexion sans fil à un autre ESP
 Cette partie a pour but de completer le programme afin que l'ESP32 fonctionne localement ou alors en mode remote, le mod remote permet de changer la couleur de la LED RGB d'un autre kit ainsi qu'un autre kit puisse changer la couleur de la LED RGB de notre kit. La LED RGB doit clignioter à une frequence de 2 Hz pour indiquer une connextion active.
