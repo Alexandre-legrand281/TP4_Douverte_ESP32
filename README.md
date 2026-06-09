@@ -1,18 +1,61 @@
 # TP4_Douverte_ESP32
 ## Visual Studio Code
+### Fichier initalisation
+
+    [env:esp32-s3-devkitc-1]
+    platform = espressif32
+    board = esp32-s3-devkitc-1
+    framework = arduino
+    lib_deps = 
+    fastled/FastLED
+    monitor_speed = 115200
+
 ### 3.1 Allumer une LED sur GPIO
 Cette partie a pour but de faire changer l'état de la LED D1 à chaque appuis du bouton S1. Un mecanisme de detection de flanc et d'antirebond doit être implémenté.
 
-Librairies utilisées:
-
-
 Dans un premier temp il faut regarder quelle son nos GPIO d'entrée et de sortie:
+
 <img width="374" height="371" alt="LED_et_Switch_Schema" src="https://github.com/user-attachments/assets/a1c48d18-c46d-4d06-a61d-92f47ae7b41d" />
 
 On remarque que la LED D1 est le GPIO6 et que le Bouton S1 est le GPIO4.
 
-Code:
 
+Pour la detection du bouton et de son flanc on doit déclarer ces deux variables:
+
+    int boutonS1 = 0;
+    int boutonOldS1 = 0;
+
+Il faut aussi déclarer la variable de la LED D1:
+
+    bool ledState = 0;
+
+La syntaxe pour la boucle infinie est comme ceci:
+
+    void loop() 
+    {
+        //code
+    }
+
+Maintenant il faut lire l'état du bouton avec la ligne suivante:
+
+    boutonS1 = digitalRead(4);
+
+Cette fonction vas lire l'état d'un port entré en paramètre (GPIO4 dans notre cas)
+
+Maintenant on peut tester la valeur de notre bouton:
+
+    if (boutonS1 == 1 && boutonOldS1 == 0) {
+        ledState = !ledState;
+        digitalWrite(6, ledState);
+        delay(10);
+    }
+
+si on detecte un appuis de bouton (avec flanc montant dans notre cas) on change l'état de ledSate, la fonction digitalWrite sert à changer l'état d'un port (dans notre cas par rapport à l'état de la variable ledState).
+Le delay de 10ms sert à garantir que le système ne detecte pas les rebonds mécanique.
+
+À la fin du code il ne faut pas oublier de mettre l'archivage de la valeur du bouton:
+
+    boutonOldS1 = boutonS1;
 
 ### 3.2 Allumer une LED RGB
 Cette partie a pour but de completer le programme afin que la LED RGB du ESP32-S3-DevKit-C change de couleur à chaque appuis du bouton S2 (R -> G -> B -> R -> etc.)
