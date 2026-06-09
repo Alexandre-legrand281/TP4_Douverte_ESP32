@@ -1,6 +1,30 @@
 # TP4_Douverte_ESP32
 ## Visual Studio Code
-### Fichier initalisation
+
+Mise en place:
+
+Pour mettre en place Visual Studio avec PlatformIO en extension il faut suivre ces étapes:
+
+1. Installer Visual Studio code
+2. Ouvrir le gestionaire d'extension (sur Vscode)
+3. Chercher l'extension platformio ide
+4. Installer PlatformIO IDE
+
+Source: https://docs.platformio.org/en/latest/integration/ide/vscode.html#ide-vscode
+
+
+Pour crée un nouveau projet il faut aller sur la fenêtre home de l'extension PlatformIO et selectioner New project:
+
+<img width="1254" height="674" alt="image" src="https://github.com/user-attachments/assets/34f8c6b8-70fd-4d8d-a2ce-7c6c3eb0cb94" />
+
+Dans le project wizzard il faut mettre un nom de projet et mettre la board utilisé dans ce TP ainsi que de selectioner le framework Arduino:
+
+<img width="587" height="448" alt="image" src="https://github.com/user-attachments/assets/5f8940eb-3117-4f06-8f01-6f8492272e71" />
+
+Le projet est maintenant crée.
+
+
+### Fichier initalisation du projet PlatformIO
 
     [env:esp32-s3-devkitc-1]
     platform = espressif32
@@ -155,7 +179,201 @@ Cette partie a pour but de completer le programme afin que l'ESP32 fonctionne lo
 
 Librairies utilisées:
 
+	#include <esp_now.h>
+	#include <WiFi.h>
 
+esp_now est la librairie pour la communication entre ESP32 et WiFi est la librairie qui vas initaliser le WIFI.
+
+Pour la communication WIFI on vas Déclarer 3 tableau:
+
+	
+	uint8_t broadcast_mac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	const uint8_t PASSWORD[] = {'E', 'S', 'P', '_', '3', '2', '_', 'R', 'E', 'M', 'O', 'T', 'E'};
+	const uint8_t COLLOR[] = {'C', 'H', 'A', 'N', 'G', 'E'};
+
+broadcast_mac est un tableau qui definis l'adresse de diffusion, dans notre cas les 6 case de 0xFF signifie envoie à tout appareil.
+PASSWORD est un tableau en message ASCII qui vas etre envoyer et comparé dans la suite du code
+COLLOR est un tableau en message ASCII qui vas indiquer la commande envoyée à un autre ESP qui vas etre envoyer et comparé dans la suite du code.
+
+La fonction d'initalisation a ausis changée:
+
+	void setup() {
+    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);// Initialiser la bande LED avec le type WS2812, le pin défini et l'ordre de couleur GRB
+    FastLED.setBrightness(20);// Régler la luminosité des LEDs 
+    leds[0] = CRGB::Red;// Initialiser la première LED à rouge
+    FastLED.show();// Afficher les changements sur les LEDs
+    
+    // Initialiser les boutons GPIO
+    pinMode(6, OUTPUT);
+    pinMode(5, INPUT);
+    pinMode(4, INPUT);
+    digitalWrite(6, LOW);
+    
+    // Initialiser ESP-NOW
+    init_esp_now();
+    
+    // Initialiser les temps d'envoi et de réception pour la gestion du mode distant
+    last_send = millis();
+    last_receive = millis();
+	}
+
+l'appel de fonction de l'initalisation du protocole ESP-NOW est effectué ici.
+Les temps d'envois et de retour sont aussi initalisé.
+
+On peut déclarer ces variables qui seront responsable de la gestion du mode et du cligniotement de la LED RGB:
+
+	unsigned long last_send = 0;
+	unsigned long last_receive = 0;
+	bool remote_mode = false;
+	bool blink_state = false;
+	unsigned long last_blink = 0;
+
+Dans cette partie 3 fonction on été crée:
+
+	/*Prototypes de fonctions*/
+	
+	void on_data_recv(const uint8_t* mac, const uint8_t* data, int len);
+	void init_esp_now();
+	void send_message(const uint8_t* msg, size_t len);
+
+on_data_recv est une fonction pour la réception de données via ESP-NOW.
+init_esp_now est une fonction qui vas initaliser le protocole ESP-NOW
+send_message est une fonction qui vas envoyer des données via ESP-NOW.
+
+Fonction on_data_recv:
+
+	void on_data_recv(const uint8_t* mac, const uint8_t* data, int len) 
+	{
+    // Check si PASSWORD reçu pour activer le mode distant
+    if (len == sizeof(PASSWORD) && memcmp(data, PASSWORD, len) == 0) {
+        remote_mode = true;// Activer le mode distant
+        last_receive = millis();// Mettre à jour le temps de la dernière réception pour éviter la désactivation du mode distant
+    }
+    
+    // Check si COLLOR reçu pour changer la couleur de la LED
+    if (len == sizeof(COLLOR) && memcmp(data, COLLOR, len) == 0) {
+        // Change la couleur de la LED en fonction de l'index actuel et l'affiche
+        colorIndex = (colorIndex + 1) % 3;
+        leds[0] = colors[colorIndex];
+        FastLED.show();
+    }
+	}
+
+cette fonction qui dans un premier temp verifier si le mot de passe reçu est bien le même qui a été définis au debut de code, si oui il active le mode remote et met â jour le temp de reception pour savoir plus tard quand le dernier message a été reçu.
+Ensuite on verifie que la commande COLLOR (changement de couleur) est reçue, si oui on incremente colorIndex et on actualise l'affichage de la LED RGB.
+
+Fonction init_esp_now:
+
+	void init_esp_now() 
+	{
+    WiFi.mode(WIFI_STA); // Mettre le WiFi en mode station pour utiliser ESP-NOW
+    WiFi.disconnect(); // Déconnecter du WiFi pour éviter les interférences avec ESP-NOW
+    
+    // Initialiser ESP-NOW et vérifier si l'initialisation a réussi
+    if (esp_now_init() != ESP_OK) { 
+        return;
+    }
+    
+    esp_now_register_recv_cb(on_data_recv);// Enregistrer la fonction de rappel pour la réception de données
+    
+    // Ajouter un peer pour la diffusion (broadcast)
+    esp_now_peer_info_t peerInfo = {};
+    memcpy(peerInfo.peer_addr, broadcast_mac, 6);// Copier l'adresse MAC de diffusion dans la structure du peer
+    peerInfo.channel = 0;// Utiliser le canal actuel
+    peerInfo.encrypt = false;// Ne pas chiffrer les données envoyées à ce peer
+    
+    // Ajouter le peer à ESP-NOW et vérifier si l'ajout a réussi
+    esp_now_add_peer(&peerInfo);
+	}
+
+Cette fonction vas initaliser le protocole de communication comme ceci:
+
+Mettre le mode WIFI en station ( Utilisation de la fréquence WIFI sans utiliser tout le protocole WIFI ( routeur wifi, adresse IP , protocole TCP))
+
+Initaliser le protocole ESP-NOW
+
+Enregister la fonction de reception de donnée
+
+Ajouter un peer de broadcast (copie adresse de broadcast predefinie au debut du code, definition du canal utilisé, choix du cryptage)
+
+ajout du peer au protocole ESP-NOW
+
+Fonction send_message:
+
+	void send_message(const uint8_t* msg, size_t len) 
+	{
+	// Envoyer un message à tous les appareils en utilisant l'adresse MAC de diffusion
+    esp_now_send(broadcast_mac, (uint8_t*) msg, len);// Cast du message en uint8_t* pour correspondre au type attendu par esp_now_send
+	}
+
+Cette fonction vas envoyer un message (password ou commande couleur) à l'adresse de broadcast.
+
+ Boucle infinie:
+
+au debut on prend le temp actuel pour pouvoir ensuite gerer le delais des modes dans la suite du code:
+
+	 //prendre le temps actuel pour la gestion des délais et des modes
+    unsigned long now = millis();
+
+On vas envoyer le mot de passe toute les 1 secondes pour maintenir la connextion(si une connexion est bien en place):
+
+	// envoi du message PASSWORD toutes les secondes pour maintenir la connexion
+    if (now - last_send > 1000) {
+        send_message(PASSWORD, sizeof(PASSWORD));
+        last_send = now;
+    }
+
+On verifie si le mode remote doit etre desactivé apès 1.5 secondes:
+
+	// verifier si le mode distant doit être désactivé après 1.5 secondes d'inactivité
+    if (remote_mode && (now - last_receive > 1500)) {
+        remote_mode = false;
+        leds[0] = colors[colorIndex];  // Fix RGB to last color
+        FastLED.show(); // Uptade la LED pour refléter le changement de mode (désactivation du clignotement)
+    }
+
+Si le mode remote est activé on fais clignioter la LED RGB à une fréquence de 2Hz:
+
+	 // mode distant: faire clignoter la LED à 2Hz
+    if (remote_mode) {
+        if (now - last_blink > 250) {  // 250ms = 2Hz
+            blink_state = !blink_state;
+            if (blink_state) {
+                leds[0] = colors[colorIndex];// Afficher la couleur actuelle lorsque le clignotement est actif
+            } else {
+                leds[0] = CRGB::Black;// Éteindre la LED lorsque le clignotement est inactif
+            }
+            FastLED.show();
+            last_blink = now;
+        }
+    }
+
+On lis les état des boutons:
+
+	boutonS1 = digitalRead(4);// Lire l'état du bouton S1 connecté au GPIO 4
+    boutonS2 = digitalRead(5);// Lire l'état du bouton S2 connecté au GPIO 5
+
+Suivant le mode activé (local ou remote) on envoie une commande de changement de couleur ou alors on change la couleur localement:
+
+	// Button S2: fonctionne différemment selon le mode (local ou distant)
+    if (boutonS2 == 1 && boutonOldS2 == 0) {
+        if (remote_mode) {
+            // Mode distant: envoyer un message pour changer la couleur à tous les autres appareils
+            send_message(COLLOR, sizeof(COLLOR));
+        } else {
+            // Mode local: changer la couleur de la LED et l'afficher
+            colorIndex = (colorIndex + 1) % 3;
+            leds[0] = colors[colorIndex];
+            FastLED.show();
+        }
+        delay(10);
+    }
+
+
+On archive l'état des boutons:
+
+	boutonOldS1 = boutonS1;
+    boutonOldS2 = boutonS2;
 
 ## Micro Python Code
 
