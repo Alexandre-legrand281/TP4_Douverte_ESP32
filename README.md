@@ -680,4 +680,191 @@ J'initialise et j'active la communication sans fil via le protocole ESP-NOW. Il 
     e = espnow.ESPNow()
     e.active(True)
 
-Je configure une variable que je nommerais "boardcast_mac", avec comme adresse MAC "b'\xff\xff\xff\xff\xff\xff'". Comme ça je ciblerais tout les ESP-32, et je 
+Je configure une variable que je nommerais "boardcast_mac", avec comme adresse MAC "b'\xff\xff\xff\xff\xff\xff'". Comme ça je ciblerais tout les ESP-32 autour, et je les enverais le message qu'il y auras sur la variable "PASSWORD", et seul l'ESP-32 qui auras le meme code pourras communiquer avec l'ESP-32 qui enveras le message, mais ceci seras plus detailler dans la boucle infinit. Je crée egalement une variable que je nommerais "COLLOR" pour un message de changement de couleur. Pour terminé, avec la fonction "e.add_peer" je vais mettre en paramétre la variable "boardcast_mac", pour indiquer l'adresse de diffusion de l'ESP-32.
+
+	# Adresse de diffusion (Broadcast)
+	broadcast_mac = b'\xff\xff\xff\xff\xff\xff'
+	e.add_peer(broadcast_mac)
+	PASSWORD = b"ESP_32_REMOTE"
+	COLLOR = b"CHANGE"
+
+Dans ma boucle infinit, je vais envoyer toutes les secondes le message "PASSWORD". Pour ceci, je vais utiliser la fonction "time.ticks_diff" pour compter jusqu'a 1 seconde (donc 1000 ms), et utiliser la fonction "e.send" en mettant en parametre la variable "boardcast_mac" et "PASSWORD", pour envoyer le message a l'adresse "b'\xff\xff\xff\xff\xff\xff'".
+
+	# Boucle Infinie
+	while True:
+    	# Point de repere du temps actuelle en ms
+    	now = time.ticks_ms()
+		
+		# Envoi du Mot de passe toutes les secondes
+    	if time.ticks_diff(now, send) > 1000:
+        	e.send(broadcast_mac, PASSWORD, False)
+        	send = now
+
+Suite a ça je vais recuprerer le message reçu dans la variable "msg" et vérifier le contenu de celui-ci. Si le message reçu est le contenu de la variable "PASSWORD", alors je passe en mode Remote. Et si le contenu du message reçu est celui de la variable "COLLOR" alors je change la couleur de la LED RGB.
+
+	# Boucle Infinie
+	while True:
+    	# Point de repere du temps actuelle en ms
+    	now = time.ticks_ms()
+		
+		# Envoi du Mot de passe toutes les secondes
+    	if time.ticks_diff(now, send) > 1000:
+        	e.send(broadcast_mac, PASSWORD, False)
+        	send = now
+
+		# Reception du message
+    	host, msg = e.recv(0) 
+    
+    	# Si le message reçu est le Mot de passe
+    	if msg == PASSWORD:
+        	# Passage en Mode Remote
+        	Remote = True
+        	# Reset du Timer
+        	time_out = now
+        
+    	# Si le message reçu est le changement de couleur
+    	if msg == COLLOR:
+        	# Changement de couleur de la LED RGB
+        	rgb_index = (rgb_index + 1) % 3
+        	np[0] = colors[rgb_index]
+        	np.write()
+
+A la fin de mon code, je fait un if pour determiné si on est dans le mode Remote ou non. La condition else, permet de faire la meme fonctionnalité que dans la partie 3.2. A l'interieur du mode Remonte, je commence par vérifier s'il y a une detection de flanc sur l'interrupteur S2, et d'utiliser le systéme d'antirebond, et si ces deux conditions sont respecté, alors j'envoi le message "COLLOR". Cella permetras au deuxieme ESP-32 de changer la couleur lorsqu'on appuie sur S2. Dans la consigne il nous est demander, que la LED RGB des deux ESP-32 clignotent a une fréquence de 2Hz lorsqu'on est en mode Remote. Pour cela j'utilise la fonction "time.ticks_diff" pour compter jusqu'a 250ms (pour avoir un rapport cyclique de 50%), et toutes les 250ms la LED RBG va changer d'état, ce qui feras un clignotement de 2Hz. Pour finir je vérifie toutes les 1.5 secondes si on est toujours en mode Remote, c'est a dire que si apres 1.5 secondes l'ESP-32 ne ressoit plus de message, il va sortir du mode Remote. Voici le resultat final de mon code:
+
+	# Librairies Importé
+	from machine import Pin
+	import time
+	import neopixel
+	import network, espnow
+
+	# Entrée des Switchs
+	PIN_S1 = 4     # Switch S1
+	PIN_S2 = 5     # Switch S2
+
+	# Sortie des LEDs
+	PIN_D1 = 6     # LED D1
+	PIN_RGB = 48   # LED RGB
+
+	# Initialisation des GPIOs
+	s1 = Pin(PIN_S1, Pin.IN)
+	s2 = Pin(PIN_S2, Pin.IN)
+	led_d1 = Pin(PIN_D1, Pin.OUT)
+
+	# Initialisation de la LED RGB
+	np = neopixel.NeoPixel(Pin(PIN_RGB), 1)
+
+	# Variables pour la logique
+	d1_state = False
+	rgb_index = 0
+	colors = [(16, 0, 0), (0, 16, 0), (0, 0, 16)] # R, G, B
+
+	# Variables de detection de flanc et l'antirebond
+	last_S1_Value = 0
+	last_S2_Value = 0
+	debounce_s1 = 0
+	debounce_s2 = 0
+
+	# Variable du mode Remote
+	Remote = False
+	blink_time = 0
+	blink = False
+	send = 0
+	time_out = 0 
+
+	# Initialisation réseau
+	wlan = network.WLAN(network.STA_IF)
+	wlan.active(True)
+	e = espnow.ESPNow()
+	e.active(True)
+
+	# Adresse de diffusion (Broadcast)
+	broadcast_mac = b'\xff\xff\xff\xff\xff\xff'
+	e.add_peer(broadcast_mac)
+	PASSWORD = b"ESP_32_REMOTE"
+	COLLOR = b"CHANGE"
+
+	# Boucle Infinie
+	while True:
+    	# Point de repere du temps actuelle en ms
+    	now = time.ticks_ms()
+
+   		# Envoi du Mot de passe toutes les secondes
+    	if time.ticks_diff(now, send) > 1000:
+			e.send(broadcast_mac, PASSWORD, False)
+        	send = now
+        
+    	# Reception du message
+    	host, msg = e.recv(0) 
+    
+    	# Si le message reçu est le Mot de passe
+    	if msg == PASSWORD:
+        	# Passage en Mode Remote
+        	Remote = True
+        	# Reset du Timer
+        	time_out = now
+        
+    	# Si le message reçu est le changement de couleur
+    	if msg == COLLOR:
+        	# Changement de couleur de la LED RGB
+        	rgb_index = (rgb_index + 1) % 3
+        	np[0] = colors[rgb_index]
+        	np.write()
+                
+    	# Detection de flanc sur S1
+    	if last_S1_Value == 1 and s1.value() == 0:
+        	# Antirebond sur S1
+        	if time.ticks_diff(now, debounce_s1) > 10:
+            	# Changement d'état de D1
+            	d1_state = not d1_state
+            	led_d1.value(d1_state)
+            	# Reset du temps d'Anti rebond sur S1
+            	debounce_s1 = now
+
+    	# Mode Remote
+    	if Remote:
+        	# Détection de flanc sur S2
+        	if last_S2_Value == 1 and s2.value() == 0:
+            	# Antirebond sur S2
+            	if time.ticks_diff(now, debounce_s2) > 10:
+                	# Envoi le message de changement de couleur
+                	e.send(broadcast_mac, COLLOR, False)
+                	# Reset du temps d'Anti rebond sur S2
+                	debounce_s2 = now
+        
+        	# Clignotement 2Hz 
+        	if time.ticks_diff(now, blink_time) > 250:
+            	blink = not blink
+            	if blink:
+                	np[0] = colors[rgb_index]
+            	else:
+                	np[0] = (0, 0, 0)
+            	np.write()    
+            	blink_time = now
+            
+        	# Au bout de 1.5 secondes
+        	if time.ticks_diff(now, time_out) > 1500:
+            	# Passage en Mode Local
+            	Remote = False
+            	# LED S2 Fixer a la derniere couleur pendant le Mode Remote
+            	np[0] = colors[rgb_index] 
+            	np.write()
+        
+    	# Mode Local
+    	else:
+        	# Détection de flanc sur S2
+        	if last_S2_Value == 1 and s2.value() == 0:
+            	# Antirebond sur S2
+            	if time.ticks_diff(now, debounce_s2) > 10:
+                	# Changement de couleur de la LED RGB
+                	rgb_index = (rgb_index + 1) % 3
+                	np[0] = colors[rgb_index]
+                	np.write()
+                	# Reset du temps d'Anti rebond sur S2
+                	debounce_s2 = now
+
+    	# Mise à jour des états
+    	last_S1_Value = s1.value()
+    	last_S2_Value = s2.value()
+    
+    	# Temps de repos de 1 ms
+    	time.sleep_ms(1)
